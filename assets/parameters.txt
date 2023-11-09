@@ -1,0 +1,1 @@
+Crie um código com as informações citadas abaixo, você está respondendo uma API, então é necessário que envie somente o código, sem formatação, sem nenhuma mensagem de resposta
