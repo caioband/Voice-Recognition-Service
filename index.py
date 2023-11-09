@@ -12,7 +12,6 @@ from pymsgbox import alert as msg
 STS = Sentence.SentenceService()
 CMDS = Commands.GetCommands()
 
-#gay
 # PyGui
 rowSize = (50, 2)
 btnSize = (int(rowSize[0]/3), rowSize[1])
