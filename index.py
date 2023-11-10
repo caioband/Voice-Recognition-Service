@@ -35,8 +35,8 @@ sg.DEFAULT_FONT = "Lexend"
 sg.TOOLTIP_FONT = "Lexend"
 sg.CUSTOM_TITLEBAR_FONT = "Lexend"
 buttons = []
-saidElement = sg.Text("You said: ", text_color="#fff", justification="left", font="Lexend 6 bold",)
-responseElement = sg.Text("Response: ", text_color="#fff", size=(50, 1), justification="left", font="Lexend 6 bold",)
+saidElement = sg.Text("You said: ", text_color="#fff", justification="left", font="Lexend 10 bold",)
+responseElement = sg.Text("Response: ", text_color="#fff", size=(50, 1), justification="left", font="Lexend 10 bold",)
 
 conversionCode = {
     "Python": "py",
@@ -57,11 +57,11 @@ class App:
         pass
     async def Init(self):
         cprint(f"""
-                [VRS] Intializing Speech Regonition App
+                [VRS] Initializing Speech Recognition App
                 [VRS] Name: {getattr(self, 'name')}
                 [VRS] Version: {getattr(self, 'version')}
                """, "cyan")
-        # Init Voice Regonition
+        # Init Voice Recognition
 
         await self.CreateAppWindow()
         pass
@@ -103,17 +103,17 @@ class App:
                     cprint("[VRS]: You need to say something and select a language.", "red")
                     continue
 
-                CommandRunned = False
+                HaveRunCommand = False
                 for Command in CMDS:
                     CommandName = Command["name"]
-                    Simmilarity = await STS.run(self.InputText, CommandName) # type: ignore
-                    if Simmilarity > 75:
-                        cprint(f"Command: {CommandName} ({Simmilarity}%)", "cyan")
+                    Similarity = await STS.run(self.InputText, CommandName) # type: ignore
+                    if Similarity > 75:
+                        cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
                         RESPONSE = await Commands.RunCommand(CommandName)
                         cprint(f"[VRS]: {RESPONSE}", "yellow")
-                        CommandRunned = True
+                        HaveRunCommand = True
                         break
-                if CommandRunned == False:
+                if HaveRunCommand == False:
                     cprint("[VRS]: Sending Text to OpenAI's API", "green")
                     text = self.InputText
                     response = main.send_to_chatgpt([{"role": "user", "content": text}])
@@ -187,9 +187,9 @@ if __name__ == '__main__':
         ],
     ]
     app = App({
-        "name": "SpeechRegonitionApp",
+        "name": "SpeechRecognitionApp",
         "version": "1.0.0",
-        "description": "Speech Regonition App",
+        "description": "Speech Recognition App",
         "layout": rows,
         "marginSize": (65,65),
     })

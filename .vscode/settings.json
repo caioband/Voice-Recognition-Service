@@ -6,9 +6,12 @@
         "cprint",
         "dotenv",
         "googletrans",
+        "Lexend",
         "openai",
+        "pymsgbox",
         "pyttsx",
         "termcolor",
+        "TITLEBAR",
         "vecs"
     ]
 }
