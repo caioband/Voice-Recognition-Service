@@ -4,5 +4,9 @@
     "cSpell.words": [
         "cprint",
         "sympy"
-    ]
+    ],
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false
 }

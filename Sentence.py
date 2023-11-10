@@ -14,10 +14,8 @@ class SentenceService:
         for i in wordslist:
             finalList.append(translator.translate(i))
         return finalList
-    
-    def get_language_by_current_settings(self, current: str):
-       return current.split('-')[0]
-    
+
+
     async def get_similarity(self, sentence1, sentence2):
         sentence_vecs = self.model.encode([sentence1, sentence2])
 
