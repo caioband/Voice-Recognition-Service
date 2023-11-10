@@ -112,7 +112,12 @@ class App:
                     Similarity = await STS.run(self.InputText, CommandName) # type: ignore
                     if Similarity > 75:
                         cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
-                        RESPONSE = await Commands.RunCommand(CommandName)
+                        RESPONSE = await Commands.RunCommand(CommandName, {
+                            "voice": values[2],
+                            "language": values[1],
+                            "codeLanguage": values[0],
+                            "volume": values[3]
+                        })
                         cprint(f"[VRS]: {RESPONSE}", "yellow")
                         HasCommandRun = True
                         break
