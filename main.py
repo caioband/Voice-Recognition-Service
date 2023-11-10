@@ -19,7 +19,7 @@ def find_language_voice(voice_objects, language_choose: str = "en-US"):
             return i
 
 
-def speak_text(command, language: str = "en-US"):
+def speak_text(command, language: str = "en-US", volume: float = 0.5):
     # print(command)
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
@@ -27,6 +27,7 @@ def speak_text(command, language: str = "en-US"):
     # id = getattr(language_audio, "id")
 
     engine.setProperty('voice', language_audio.id) #type: ignore
+    engine.setProperty('volume', volume)
     engine.say(command)
     engine.runAndWait()
 

@@ -31,6 +31,7 @@ async def TellNews():
     SETTINGS = json.loads(open("./settings/main.json", "r").read())
     IsVoiceEnabled = SETTINGS["voice"]
     Language = SETTINGS["language"]
+    Volume = SETTINGS["volume"]
 
     for noticia in noticias:
         titulo = noticia.find('a', attrs={'class': 'feed-post-link'})  #type: ignore
@@ -42,7 +43,7 @@ async def TellNews():
 
         if (subtitulo):
           if (IsVoiceEnabled):
-            main.speak_text(subtitulo.text, Language)
+            main.speak_text(subtitulo.text, Language, Volume[3]/100)
             print(subtitulo.text)
 
     return titulo.text #type: ignore

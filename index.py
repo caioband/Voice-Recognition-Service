@@ -58,11 +58,11 @@ class App:
         pass
     async def Init(self):
         cprint(f"""
-                [VRS] Intializing Speech Regonition App
+                [VRS] Initializing Speech Recognition App
                 [VRS] Name: {getattr(self, 'name')}
                 [VRS] Version: {getattr(self, 'version')}
                """, "cyan")
-        # Init Voice Regonition
+        # Init Voice Recognition
 
         await self.CreateAppWindow()
         pass
@@ -89,7 +89,8 @@ class App:
                 settings = {
                     "voice": values[2],
                     "language": values[1],
-                    "codeLanguage": values[0]
+                    "codeLanguage": values[0],
+                    "volume": values[3]
                 }
                 with open("./settings/main.json", "w") as file:
                     json.dump(settings, file)
@@ -105,24 +106,24 @@ class App:
                     cprint("[VRS]: You need to say something and select a language.", "red")
                     continue
 
-                CommandRunned = False
+                HasCommandRun = False
                 for Command in CMDS:
                     CommandName = Command["name"]
-                    Simmilarity = await STS.run(self.InputText, CommandName) # type: ignore
-                    if Simmilarity > 75:
-                        cprint(f"Command: {CommandName} ({Simmilarity}%)", "cyan")
+                    Similarity = await STS.run(self.InputText, CommandName) # type: ignore
+                    if Similarity > 75:
+                        cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
                         RESPONSE = await Commands.RunCommand(CommandName)
                         cprint(f"[VRS]: {RESPONSE}", "yellow")
-                        CommandRunned = True
+                        HasCommandRun = True
                         break
-                if CommandRunned == False:
+                if HasCommandRun == False:
                     cprint("[VRS]: Sending Text to OpenAI's API", "green")
                     text = self.InputText
                     response = main.send_to_chatgpt([{"role": "user", "content": text}])
                     responseElement.Update(f"Response: {response}")
                     cprint(f"[ChatGPT]: {response}", "yellow")
                     if values[2] == True:
-                        threading.Thread(target=main.speak_text, args=(response, values[1])).start()
+                        main.speak_text(response, values[1], values[3]/100)
 
             if event == "Code":
                 if self.InputText == "" or values[0] == None:
@@ -186,12 +187,13 @@ if __name__ == '__main__':
             ),
             sg.Checkbox("Voice", default=SETTINGS["voice"], font="Lexend 5 bold"),
         ],
-        [sg.Text("Volume", font="Lexend 10 bold"), sg.Slider(range=(0, 100), default_value=50, orientation="h")]
+        [sg.Text("Volume", font="Lexend 10 bold")],
+        [sg.Slider(range=(0, 100), default_value=SETTINGS["volume"], orientation="h", size=(30,13), font = "Lexend 10 bold", border_width=0)]
     ]
     app = App({
-        "name": "SpeechRegonitionApp",
+        "name": "SpeechRecognitionApp",
         "version": "1.0.0",
-        "description": "Speech Regonition App",
+        "description": "Speech Recognition App",
         "layout": rows,
         "marginSize": (65,65),
         "settings": SETTINGS
