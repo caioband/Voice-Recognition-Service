@@ -1,18 +1,40 @@
 from datetime import datetime
+from numpy import number
+from openai import audio
+
+from torch import seed
 import main
 from regex import F
 import requests
 from sympy import content
 from bs4 import BeautifulSoup
+from googletrans import Translator
+
+import Sentence
 import threading
 import json
 
+STS = Sentence.SentenceService()
 
-async def WhatTimeIs():
+def identify_alarm_hour_by_str(text : str):
+    Alarm = []
+    for i in text:
+        if i.isnumeric():
+            Alarm.append(i)
+    return Alarm
+
+
+async def WhatTimeIs(Settings):
     Time = datetime.now()
     return f"Now is {Time.hour}:{Time.minute} of {Time.day}/{Time.month}/{Time.year}"
 
-async def CreateAlarm():
+async def CreateAlarm(Settings):
+    language = STS.get_language_by_current_settings(Settings["language"])
+    translator = Translator()
+    audiotext = translator.translate("For what time would you like to set the alarm?",language)
+    main.speak_text(audiotext.text, Settings["language"], Settings["volume"])
+    speak_alarm_hour = main.record_text(Settings["language"])
+    print(identify_alarm_hour_by_str(speak_alarm_hour)) #type: ignore
     return "Alarm created"
 
 async def RemoveAlarm():

@@ -3,6 +3,8 @@ import pyttsx3
 import openai
 import dotenv
 import os
+
+from googletrans import Translator
 from termcolor import cprint
 
 # language_choose = "en-US"
