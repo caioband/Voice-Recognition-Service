@@ -1,17 +1,4 @@
 {
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "basic",
-    "cSpell.words": [
-        "bert",
-        "cprint",
-        "dotenv",
-        "googletrans",
-        "Lexend",
-        "openai",
-        "pymsgbox",
-        "pyttsx",
-        "termcolor",
-        "TITLEBAR",
-        "vecs"
-    ]
+    "python.analysis.typeCheckingMode": "basic"
 }

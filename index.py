@@ -5,6 +5,7 @@ import main
 from termcolor import cprint
 import asyncio
 import Sentence
+import threading
 import Commands
 import json
 from pymsgbox import alert as msg
@@ -57,11 +58,11 @@ class App:
         pass
     async def Init(self):
         cprint(f"""
-                [VRS] Initializing Speech Recognition App
+                [VRS] Intializing Speech Regonition App
                 [VRS] Name: {getattr(self, 'name')}
                 [VRS] Version: {getattr(self, 'version')}
                """, "cyan")
-        # Init Voice Recognition
+        # Init Voice Regonition
 
         await self.CreateAppWindow()
         pass
@@ -71,6 +72,7 @@ class App:
         self.layout = getattr(self, "layout")
         self.marginSize = getattr(self, "marginSize")
         self.InputText = ""
+        self.SETTINGS = getattr(self, "settings")
         window = sg.Window(
             title=f"{self.name} - {self.version}",
             layout=self.layout,
@@ -103,25 +105,24 @@ class App:
                     cprint("[VRS]: You need to say something and select a language.", "red")
                     continue
 
-                HaveRunCommand = False
+                CommandRunned = False
                 for Command in CMDS:
                     CommandName = Command["name"]
-                    Similarity = await STS.run(self.InputText, CommandName) # type: ignore
-                    if Similarity > 75:
-                        cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
+                    Simmilarity = await STS.run(self.InputText, CommandName) # type: ignore
+                    if Simmilarity > 75:
+                        cprint(f"Command: {CommandName} ({Simmilarity}%)", "cyan")
                         RESPONSE = await Commands.RunCommand(CommandName)
                         cprint(f"[VRS]: {RESPONSE}", "yellow")
-                        HaveRunCommand = True
+                        CommandRunned = True
                         break
-                if HaveRunCommand == False:
+                if CommandRunned == False:
                     cprint("[VRS]: Sending Text to OpenAI's API", "green")
                     text = self.InputText
                     response = main.send_to_chatgpt([{"role": "user", "content": text}])
                     responseElement.Update(f"Response: {response}")
                     cprint(f"[ChatGPT]: {response}", "yellow")
                     if values[2] == True:
-                        await asyncio.sleep(2)
-                        main.speak_text(response, values[1])
+                        threading.Thread(target=main.speak_text, args=(response, values[1])).start()
 
             if event == "Code":
                 if self.InputText == "" or values[0] == None:
@@ -185,12 +186,14 @@ if __name__ == '__main__':
             ),
             sg.Checkbox("Voice", default=SETTINGS["voice"], font="Lexend 5 bold"),
         ],
+        [sg.Text("Volume", font="Lexend 10 bold"), sg.Slider(range=(0, 100), default_value=50, orientation="h")]
     ]
     app = App({
-        "name": "SpeechRecognitionApp",
+        "name": "SpeechRegonitionApp",
         "version": "1.0.0",
-        "description": "Speech Recognition App",
+        "description": "Speech Regonition App",
         "layout": rows,
         "marginSize": (65,65),
+        "settings": SETTINGS
     })
     asyncio.run(app.Init())

@@ -8,10 +8,10 @@ class SentenceService:
     def __init__(self, model_name: str = model_name):
         self.model = SentenceTransformer(model_name)
 
-    async def convert_items_to_english(self, WordList):
+    async def convert_items_to_english(self, wordslist):
         translator = Translator()
         finalList = []
-        for i in WordList:
+        for i in wordslist:
             finalList.append(translator.translate(i))
         return finalList
 
