@@ -3,23 +3,22 @@ import os
 from datetime import datetime
 import main
 from termcolor import cprint
-import asyncio
 import Sentence
-import threading
 import Commands
 import json
-import dotenv
+from dotenv import load_dotenv as LoadDotEnv, find_dotenv as FindDotEnv
 from pymsgbox import alert as msg
+
+LoadDotEnv(FindDotEnv())
 
 # Modules
 import Modules.Languages as LanguageBuilder
 import Modules.Speaker as SpeakerBuilder
-import Modules.API as API
+from Modules.API import API
 
-dotenv.load_dotenv(dotenv.find_dotenv())
-OPENAI_KEY = os.getenv("OPENAI_KEY")
-
-api = API.API(OPENAI_KEY) #type: ignore
+OpenAI = API(
+    API_KEY=str(os.getenv("OPENAI_KEY")),
+) #type: ignore
 
 STS = Sentence.SentenceService()
 CMDS = Commands.GetCommands()
@@ -154,7 +153,7 @@ class App:
                 parameters = open("./assets/parameters.txt", "r").read()
                 initialParameters = f"{parameters}:\n{text} em {language}"
                 print(text)
-                code = api.Chat(messages=[{"role": "user", "content": initialParameters}], temperature=1)
+                code = OpenAI.Chat(messages=[{"role": "user", "content": initialParameters}], temperature=1)
                 time = datetime.now()
                 fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
                 fileName = f"code_{fileDate}"

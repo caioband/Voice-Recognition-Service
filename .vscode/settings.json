@@ -3,6 +3,7 @@
         "cprint",
         "sympy"
     ],
+    "cSpell.enabled": false,
     "editor.formatOnSaveMode": "modifications",
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
