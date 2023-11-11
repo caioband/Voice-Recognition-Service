@@ -9,8 +9,8 @@ class Translator:
         language = self.FormatToGoogle(settings["language"]) # [pt-BR, en-US, es-ES, ...]
 
         RESULT = self.Translator.translate(text,language)
-
-        return RESULT.text # Return translated text
+        TEXT = RESULT.text  # type: ignore
+        return str(TEXT)
 
     def FormatToGoogle(self, current: str):
        return current[:2].lower()
