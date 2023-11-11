@@ -1,1 +1,6 @@
-{"voice": true, "language": "pt-BR", "codeLanguage": "Python", "volume": 100.0}
+{
+    "voice": true,
+    "codeLanguage": "HTML",
+    "language": "pt-BR",
+    "volume": 100
+}

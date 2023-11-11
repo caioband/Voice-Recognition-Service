@@ -1,13 +1,15 @@
-import PySimpleGUI as sg
-import os
-from datetime import datetime
+import os as System
+from os import system as Shell
+from os import getenv as Env
+from datetime import datetime as Date
 import main
-from termcolor import cprint
+from termcolor import cprint as print
 import Sentence
 import Commands
 import json
 from dotenv import load_dotenv as LoadDotEnv, find_dotenv as FindDotEnv
 from pymsgbox import alert as msg
+import PySimpleGUI as sg
 
 LoadDotEnv(FindDotEnv())
 
@@ -17,7 +19,7 @@ import Modules.Speaker as SpeakerBuilder
 from Modules.API import API
 
 OpenAI = API(
-    API_KEY=str(os.getenv("OPENAI_KEY")),
+    API_KEY=str(Env("OPENAI_KEY")),
 ) #type: ignore
 
 STS = Sentence.SentenceService()
@@ -67,7 +69,7 @@ class App:
             setattr(self, key, value)
         pass
     def Init(self):
-        cprint(f"""
+        print(f"""
                 [VRS] Initializing Speech Recognition App
                 [VRS] Name: {getattr(self, 'name')}
                 [VRS] Version: {getattr(self, 'version')}
@@ -92,7 +94,7 @@ class App:
         while True:
             event, values = window.read() # type: ignore
             if event == sg.WIN_CLOSED or event == 'Exit':
-                cprint("[VRS]: Window Closed!", "red")
+                print("[VRS]: Window Closed!", "red")
                 window.Close()
                 break
             if event == "Save Settings":
@@ -106,14 +108,14 @@ class App:
                     json.dump(settings, file)
                 msg("Settings saved with success!", "[VRS] Notification")
             if event == "Record":
-                cprint("[VRS]: Recording Voice", "green")
+                print("[VRS]: Recording Voice", "green")
                 text = main.record_text(values[1])
                 self.InputText = text
-                cprint(f"[VRS]: You said: {self.InputText}", "yellow")
+                print(f"[VRS]: You said: {self.InputText}", "yellow")
                 saidElement.Update(f"You said: {self.InputText}")
             if event == "Assistant":
                 if self.InputText == "":
-                    cprint("[VRS]: You need to say something and select a language.", "red")
+                    print("[VRS]: You need to say something and select a language.", "red")
                     continue
 
                 HasCommandRun = False
@@ -121,22 +123,22 @@ class App:
                     CommandName = Command["name"]
                     Similarity = STS.run(self.InputText, CommandName) # type: ignore
                     if Similarity > 75:
-                        cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
+                        print(f"Command: {CommandName} ({Similarity}%)", "cyan")
                         RESPONSE = Commands.RunCommand(CommandName, {
                             "voice": values[2],
                             "language": values[1],
                             "codeLanguage": values[0],
                             "volume": values[3]
                         })
-                        cprint(f"[VRS]: {RESPONSE}", "yellow")
+                        print(f"[VRS]: {RESPONSE}", "yellow")
                         HasCommandRun = True
                         break
                 if HasCommandRun == False:
-                    cprint("[VRS]: Sending Text to OpenAI's API", "green")
+                    print("[VRS]: Sending Text to OpenAI's API", "green")
                     text = self.InputText
                     response = main.send_to_chatgpt([{"role": "user", "content": text}])
                     responseElement.Update(f"Response: {response}")
-                    cprint(f"[ChatGPT]: {response}", "yellow")
+                    print(f"[ChatGPT]: {response}", "yellow")
                     if values[2] == True:
                         print('')
                         api.Speak(response) #type: ignore
@@ -144,25 +146,25 @@ class App:
 
             if event == "Code":
                 if self.InputText == "" or values[0] == None:
-                    cprint("[VRS]: You need to say something and select a programming language.", "red")
+                    print("[VRS]: You need to say something and select a programming language.", "red")
                     continue
 
-                cprint("[VRS]: Sending Text to OpenAI's API", "green")
+                print("[VRS]: Sending Text to OpenAI's API", "green")
                 text = self.InputText
                 language = values[0]
                 parameters = open("./assets/parameters.txt", "r").read()
                 initialParameters = f"{parameters}:\n{text} em {language}"
-                print(text)
+                print(str(text))
                 code = OpenAI.Chat(messages=[{"role": "user", "content": initialParameters}], temperature=1)
-                time = datetime.now()
+                time = Date.now()
                 fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
                 fileName = f"code_{fileDate}"
                 extension = conversionCode[language]
                 with open(f"./scripts/{fileName}.{extension}", 'w') as f:
                     f.write(str(code))
-                    cprint(f"[VRS]: Code created: {fileName}.{extension}", "cyan")
-                    codePath = os.path.abspath(f"./scripts/{fileName}.{extension}")
-                    os.system(f'code "{codePath}"')
+                    print(f"[VRS]: Code created: {fileName}.{extension}", "cyan")
+                    codePath = System.path.abspath(f"./scripts/{fileName}.{extension}")
+                    Shell(f'code "{codePath}"')
         pass
 
 if __name__ == '__main__':

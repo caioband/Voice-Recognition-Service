@@ -9,5 +9,21 @@
     "editor.formatOnSave": true,
     "editor.formatOnType": false,
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "Modules/__pycache__": true,
+        "__pycache__": true,
+        "Cache": true
+    },
+    "hide-files.files": [
+        "Modules/__pycache__",
+        "__pycache__",
+        "Cache"
+    ]
 }
