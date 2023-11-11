@@ -156,8 +156,13 @@ def CreateNewCode(Settings):
         {"role": "user", "content": code_details}
     ])
     
+    print(api_response)
+
     api_response = json.loads(api_response)
     
+
+
+
     content_translated = Languages.Translate(Settings,api_response["To_do"] + " em " + api_response["p_language"])
     
     #
