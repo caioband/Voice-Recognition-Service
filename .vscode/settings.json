@@ -1,12 +1,10 @@
 {
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.typeCheckingMode": "basic",
     "cSpell.words": [
         "cprint",
         "sympy"
     ],
-    "editor.formatOnSaveMode": "modificationsIfAvailable",
-    "editor.formatOnPaste": false,
-    "editor.formatOnSave": false,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.formatOnType": false
 }

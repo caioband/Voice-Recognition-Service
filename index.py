@@ -8,7 +8,18 @@ import Sentence
 import threading
 import Commands
 import json
+import dotenv
 from pymsgbox import alert as msg
+
+# Modules
+import Modules.Languages as LanguageBuilder
+import Modules.Speaker as SpeakerBuilder
+import Modules.API as API
+
+dotenv.load_dotenv(dotenv.find_dotenv())
+OPENAI_KEY = os.getenv("OPENAI_KEY")
+
+api = API.API(OPENAI_KEY) #type: ignore
 
 STS = Sentence.SentenceService()
 CMDS = Commands.GetCommands()
@@ -56,7 +67,7 @@ class App:
         for key, value in props.items():
             setattr(self, key, value)
         pass
-    async def Init(self):
+    def Init(self):
         cprint(f"""
                 [VRS] Initializing Speech Recognition App
                 [VRS] Name: {getattr(self, 'name')}
@@ -64,9 +75,9 @@ class App:
                """, "cyan")
         # Init Voice Recognition
 
-        await self.CreateAppWindow()
+        self.CreateAppWindow()
         pass
-    async def CreateAppWindow(self):
+    def CreateAppWindow(self):
         self.name = getattr(self, "name")
         self.version = getattr(self, "version")
         self.layout = getattr(self, "layout")
@@ -109,10 +120,10 @@ class App:
                 HasCommandRun = False
                 for Command in CMDS:
                     CommandName = Command["name"]
-                    Similarity = await STS.run(self.InputText, CommandName) # type: ignore
+                    Similarity = STS.run(self.InputText, CommandName) # type: ignore
                     if Similarity > 75:
                         cprint(f"Command: {CommandName} ({Similarity}%)", "cyan")
-                        RESPONSE = await Commands.RunCommand(CommandName, {
+                        RESPONSE = Commands.RunCommand(CommandName, {
                             "voice": values[2],
                             "language": values[1],
                             "codeLanguage": values[0],
@@ -128,7 +139,9 @@ class App:
                     responseElement.Update(f"Response: {response}")
                     cprint(f"[ChatGPT]: {response}", "yellow")
                     if values[2] == True:
-                        main.speak_text(response, values[1], values[3]/100)
+                        print('')
+                        api.Speak(response) #type: ignore
+                        #main.speak_text(response, values[1], values[3]/100)
 
             if event == "Code":
                 if self.InputText == "" or values[0] == None:
@@ -203,4 +216,4 @@ if __name__ == '__main__':
         "marginSize": (65,65),
         "settings": SETTINGS
     })
-    asyncio.run(app.Init())
+    app.Init()
