@@ -17,6 +17,7 @@ class API:
         )
         return str(response.choices[0].message.content)
     def Speak(self, input: str, voice = 'echo') -> None:
+        print("function called")
         response = self.Client.audio.speech.create(
             model="tts-1",
             voice = voice.lower(), # type: ignore
@@ -24,6 +25,9 @@ class API:
         )
         response.stream_to_file("./Cache/SpeechText.mp3")
         playsound.playsound("./Cache/SpeechText.mp3", True) # True = Yields code
+
+        if os.path.exists("./Cache/SpeechText.mp3"):
+            os.remove("./Cache/SpeechText.mp3")
         pass
 
 

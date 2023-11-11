@@ -153,7 +153,8 @@ class App:
                 language = values[0]
                 parameters = open("./assets/parameters.txt", "r").read()
                 initialParameters = f"{parameters}:\n{text} em {language}"
-                code = main.send_to_chatgpt([{"role": "user", "content": initialParameters}])
+                print(text)
+                code = api.Chat([{"role": "user", "content": initialParameters}])
                 time = datetime.now()
                 fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
                 fileName = f"code_{fileDate}"
