@@ -6,5 +6,7 @@
     "editor.formatOnSaveMode": "modifications",
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
-    "editor.formatOnType": false
+    "editor.formatOnType": false,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic"
 }

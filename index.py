@@ -154,7 +154,7 @@ class App:
                 parameters = open("./assets/parameters.txt", "r").read()
                 initialParameters = f"{parameters}:\n{text} em {language}"
                 print(text)
-                code = api.Chat([{"role": "user", "content": initialParameters}])
+                code = api.Chat(messages=[{"role": "user", "content": initialParameters}], temperature=1)
                 time = datetime.now()
                 fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
                 fileName = f"code_{fileDate}"

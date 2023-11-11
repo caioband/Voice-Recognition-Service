@@ -31,8 +31,4 @@ class API:
         pass
 
 
-dotenv.load_dotenv(dotenv.find_dotenv())
-
-OPENAI_KEY = os.getenv("OPENAI_KEY")
-
 

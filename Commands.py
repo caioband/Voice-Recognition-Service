@@ -74,7 +74,7 @@ def SendMessage():
 
 def IntroduceYourself(Settings):
     content_translated = Languages.Translate(Settings,"Apresente-se para o mundo")
-    euIA = api.Chat([
+    euIA = api.Chat(messages=[
     {"role": "system", "content": "Você é um assistente virtual que usa a API da OpenAI e que está em desenvolvimento pelo Caio Bandeira e o João Teixeira, mais conhecido como 'SinceVoid'"},
     {"role": "system", "content": "Atualmente suporta apenas as linguagens em português e inglês"},
     {"role": "system", "content": "Está sendo desenvolvido para auxiliar tanto em perguntas por voz e texto, mas também para, futuramente, poder facilitar as suas interações dentro de casa e com o mundo"},
@@ -97,7 +97,7 @@ def TellNews(Settings):
          #type: ignore
 
         subtitulo = noticia.find('div', attrs={'class': 'feed-post-body-resumo'})
-        
+
         if (subtitulo):
           if (IsVoiceEnabled):
             time.sleep(5)
@@ -149,36 +149,37 @@ def CreateNewCode(Settings):
     code_details = main.record_text(Settings['language'])
     print(code_details)
 
-    api_response = api.Chat([
+    api_response = api.Chat(messages=[
         {"role": "system", "content": "Identifique o que o usuário quer que você faça e em qual linguagem de programação"},
         {"role": "system", "content": "Se o usuário não especificar nenhuma linguagem de programação conhecida na frase, retorne apenas 'None',caso contrário, retorne a mensagem como um objeto JSON,sem nenhum tipo de texto além disso, indexando no objeto o que o usuário pediu, em qual linguagem de programação ele quer e a extensão do arquivo da linguagem de programação que o usuário pediu(exemplo: '.js')"},
         {"role": "system", "content": "Indexe o que o usuário pediu como 'To_do', a linguagem que ele quer como 'p_language'e a extensão do arquivo como 'ext'"},
-        {"role": "user", "content": code_details}
-    ])
-    
+        {"role": "user", "content": code_details}],
+        temperature=0
+    )
+
     print(api_response)
 
     api_response = json.loads(api_response)
-    
+
 
 
 
     content_translated = Languages.Translate(Settings,api_response["To_do"] + " em " + api_response["p_language"])
-    
+
     #
-    final_code = api.Chat([
+    final_code = api.Chat(messages=[
         {"role": "system", "content": "responda apenas com o código que o usuário pediu, sem nenhum tipo de texto além disso"},
         {"role": "user", "content": content_translated}
-        ])
+        ], temperature=1)
 
     time = datetime.now()
     fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
     fileName = f"code_{fileDate}"
     extension = api_response["ext"]
-    with open(f"./scripts/{fileName}.{extension}", 'w') as f:
+    with open(f"./scripts/{fileName}{extension}", 'w', encoding='utf-8') as f:
         f.write(str(final_code))
-        cprint(f"[VRS]: Code created: {fileName}.{extension}", "cyan")
-        codePath = os.path.abspath(f"./scripts/{fileName}.{extension}")
+        cprint(f"[VRS]: Code created: {fileName}{extension}", "cyan")
+        codePath = os.path.abspath(f"./scripts/{fileName}{extension}")
         os.system(f'code "{codePath}"')
 
     return
