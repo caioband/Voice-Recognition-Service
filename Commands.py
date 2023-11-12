@@ -162,15 +162,16 @@ def CreateText(Settings):
     api_responses = api.Chat(messages=[
         {"role": "system", "content": "Interprete o pedido do usuário considerando: erros de linguagem, erros de sintaxe, apenas ignore-os"},
         {"role": "system", "content": "Crie um passo a passo de intruções para a criação do texto."},
-        {"role": "system", "content": "Identifique ou crie parametros como: 'title' sendo o título do texto, crie um nome de arquivo sem a extensão de arquivo, 'task' sendo a tarefa, 'author' sendo o criador, 'language' sendo a lingua, com base nas instruções do usuário"},
+        {"role": "system", "content": "Identifique ou crie parametros como: 'title' sendo o título do texto, crie um nome de arquivo (não contendo espaços e caracteres especiais) sem a extensão de arquivo, 'task' sendo a tarefa, 'language' sendo a lingua, com base nas instruções do usuário"},
         {"role": "system", "content": "Crie um objeto JSON com os parametros identificados, e retorne o objeto JSON"},
         {"role": "user", "content": text_details}
     ])
+    print(api_responses[0])
     api_response = json.loads(api_responses[0])
 
     Text_Title = api_response["title"]
     Text_Task = api_response["task"]
-    Text_Author = api_response["author"]
+    Text_FileName = api_response["file_name"]
     Text_Language = api_response["language"]
 
     Responses = api.Chat(messages=[
@@ -178,15 +179,16 @@ def CreateText(Settings):
         {"role": "system", "content": f"Você é um escrito de redações no modelo ENEM e deve criar um texto de acordo com as normas do ENEM"},
         {"role": "system", "content": "Interprete a tarefa a ser executada e crie o texto solicitado."},
         {"role": "system", "content": "O texto será inserido diretamente em um arquivo, e deve estar pronto para que seja executado, sem alterações, entenda que, não pode-se acrescentar nada além de texto na sua resposta."},
-        {"role": "user", "content": f"Crie uma redação no modelo do ENEM, com o tema: {Text_Task} na linguagem: {Text_Language}. O texto deve ser escrito por: {Text_Author}."},
+        {"role": "user", "content": f"Crie uma redação no modelo do ENEM, com o tema: {Text_Task} na linguagem: {Text_Language}."},
     ], temperature=0.5, tokens=1250)
 
     Response_Text = Responses[0]
-    Path = f"{os.path.expanduser('~')}\\Documents\\{Text_Title}.txt"
+    Path = f"{os.path.expanduser('~')}\\Documents\\{Text_FileName}.txt"
     with open(Path, "w", encoding='utf-8') as f:
         f.write(str(Response_Text))
         print(f"[VRS]: Text created: {Text_Title}", "cyan")
-    os.system('notepad.exe + "Path"')
+        print(Path)
+    os.system(f'notepad.exe + "{Path}"')
 
     # Fale o titulo, conteudo, autor, e a lingua do texto
     input = f"I wrote the text about: {Text_Task}. in {Text_Language}."
