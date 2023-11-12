@@ -141,7 +141,7 @@ class App:
                     print(f"[ChatGPT]: {response}", "yellow")
                     if values[2] == True:
                         print('')
-                        api.Speak(response) #type: ignore
+                        OpenAI.Speak(response) #type: ignore
                         #main.speak_text(response, values[1], values[3]/100)
 
             if event == "Code":

@@ -1,6 +1,7 @@
 from datetime import datetime
 from numpy import number
 from openai import audio
+import random
 
 from torch import seed
 import main
@@ -9,7 +10,7 @@ import requests
 from sympy import content
 from bs4 import BeautifulSoup
 from googletrans import Translator
-from termcolor import cprint
+from termcolor import cprint as print
 
 import os
 import dotenv
@@ -75,11 +76,11 @@ def SendMessage():
 def IntroduceYourself(Settings):
     content_translated = Languages.Translate(Settings,"Apresente-se para o mundo")
     euIA = api.Chat(messages=[
-    {"role": "system", "content": "Você é um assistente virtual que usa a API da OpenAI e que está em desenvolvimento pelo Caio Bandeira e o João Teixeira, mais conhecido como 'SinceVoid'"},
-    {"role": "system", "content": "Atualmente suporta apenas as linguagens em português e inglês"},
-    {"role": "system", "content": "Está sendo desenvolvido para auxiliar tanto em perguntas por voz e texto, mas também para, futuramente, poder facilitar as suas interações dentro de casa e com o mundo"},
-    {"role": "user", "content": content_translated}])
-    api.Speak(euIA)
+        {"role": "system", "content": "Você é um assistente virtual que usa a API da OpenAI e que está em desenvolvimento pelo Caio Bandeira e o João Teixeira, mais conhecido como 'SinceVoid'"},
+        {"role": "system", "content": "Atualmente suporta apenas as linguagens em português e inglês"},
+        {"role": "system", "content": "Está sendo desenvolvido para auxiliar tanto em perguntas por voz e texto, mas também para, futuramente, poder facilitar as suas interações dentro de casa e com o mundo"},
+        {"role": "user", "content": content_translated}])
+    api.Speak(euIA[0])
 
 def TellNews(Settings):
     RESPONSE = requests.get("https://g1.globo.com/")
@@ -107,7 +108,8 @@ def TellNews(Settings):
             pred_count = tts_count + 1
             print('noticia' + " " + str(tts_count))
             print(titulo.text + '/' + subtitulo.text)
-            print(pred_count,60-pred_one_min_count,(pred_count/(60-pred_one_min_count)))
+
+            print(f"{pred_count,60-pred_one_min_count,(pred_count/(60-pred_one_min_count))}")
             api.Speak(titulo.text + ',' + subtitulo.text)
             if (pred_count/(60-pred_one_min_count)) >= 0.2:
                 content_translated = Languages.Translate(Settings,"Pausa de 30 segundos devido ao excesso de requests para a OpenAI, para pular essas interrupções, suporte-nos em nosso patreon!")
@@ -125,11 +127,11 @@ def TellNews(Settings):
             pred_count = tts_count + 1
             print('noticia' + " " + str(tts_count))
             print(titulo.text)
-            print(pred_count,60-pred_one_min_count,(pred_count/(60-pred_one_min_count)))
+            print(f"{pred_count,60-pred_one_min_count,(pred_count/(60-pred_one_min_count))}")
             api.Speak(titulo.text)
             if (pred_count/(60-pred_one_min_count)) >= 0.14:
                 content_translated = Languages.Translate(Settings,"Pausa de 30 segundos devido ao excesso de requests para a OpenAI, para pular essas interrupções, suporte-nos em nosso patreon!")
-                print("Pausa de 30 segundos devido ao excesso de requests para a OpenAI, para pular essas interrupções, suporte-nos em nosso patreon!")
+                print("Pausa de 30 segundos devido ao excesso de requests para a OpenAI, para pular essas interrupções, apoie-nos em nosso patreon!")
                 api.Speak(content_translated)
                 time.sleep(30)
                 tts_count = 0
@@ -141,45 +143,114 @@ def TellNews(Settings):
 def OrderFood():
     return "Food ordered"
 
+def CreateText(Settings):
+    Inputs=[
+        "Please, Describe the text you want me to create.",
+        "Describe the text you want me to create.",
+        "Tell-me how the text should be written.",
+        "I need you to describe the text you want me to create.",
+        "I need more details about the text you want me to create.",
+    ]
+    Input_Choice = random.choice(Inputs)
+    content_translated = Languages.Translate(Settings,Input_Choice)
+    print(f"[VRS]: {content_translated}", "cyan")
+    api.Speak(content_translated)
+
+    text_details = main.record_text(Settings['language'])
+    print(str(text_details))
+
+    api_responses = api.Chat(messages=[
+        {"role": "system", "content": "Interprete o pedido do usuário considerando: erros de linguagem, erros de sintaxe, apenas ignore-os"},
+        {"role": "system", "content": "Crie um passo a passo de intruções para a criação do texto."},
+        {"role": "system", "content": "Identifique ou crie parametros como: 'title' sendo o título do texto, crie um nome de arquivo sem a extensão de arquivo, 'task' sendo a tarefa, 'author' sendo o criador, 'language' sendo a lingua, com base nas instruções do usuário"},
+        {"role": "system", "content": "Crie um objeto JSON com os parametros identificados, e retorne o objeto JSON"},
+        {"role": "user", "content": text_details}
+    ])
+    api_response = json.loads(api_responses[0])
+
+    Text_Title = api_response["title"]
+    Text_Task = api_response["task"]
+    Text_Author = api_response["author"]
+    Text_Language = api_response["language"]
+
+    Responses = api.Chat(messages=[
+        {"role": "system", "content": "É extremamente importante que sua resposta utilize somente de caracteres alfanuméricos. (exemplo: 'a-z', '0-9', 'A-Z')"},
+        {"role": "system", "content": f"Você é um escrito de redações no modelo ENEM e deve criar um texto de acordo com as normas do ENEM"},
+        {"role": "system", "content": "Interprete a tarefa a ser executada e crie o texto solicitado."},
+        {"role": "system", "content": "O texto será inserido diretamente em um arquivo, e deve estar pronto para que seja executado, sem alterações, entenda que, não pode-se acrescentar nada além de texto na sua resposta."},
+        {"role": "user", "content": f"Crie uma redação no modelo do ENEM, com o tema: {Text_Task} na linguagem: {Text_Language}. O texto deve ser escrito por: {Text_Author}."},
+    ], temperature=0.5, tokens=1250)
+
+    Response_Text = Responses[0]
+    Path = f"{os.path.expanduser('~')}\\Documents\\{Text_Title}.txt"
+    with open(Path, "w", encoding='utf-8') as f:
+        f.write(str(Response_Text))
+        print(f"[VRS]: Text created: {Text_Title}", "cyan")
+    os.system('notepad.exe + "Path"')
+
+    # Fale o titulo, conteudo, autor, e a lingua do texto
+    input = f"I wrote the text about: {Text_Task}. in {Text_Language}."
+    translated = Languages.Translate(Settings, input)
+    api.Speak(translated)
+
+    pass
+
 def CreateNewCode(Settings):
     api_response = "None"
-    content_translated = Languages.Translate(Settings,"Por favor, diga-me com mais detalhes o código que você gostaria que eu fizesse.")
+
+    Inputs=[
+        "Please, Describe the code you want me to create.",
+        "Describe the code you want me to create.",
+        "Tell-me how the code should be written.",
+        "I need you to describe the code you want me to create.",
+        "I need more details about the code you want me to create.",
+    ]
+    Input_Choice = random.choice(Inputs)
+    content_translated = Languages.Translate(Settings,Input_Choice)
+    print(f"[VRS]: {content_translated}", "cyan")
     api.Speak(content_translated)
 
     code_details = main.record_text(Settings['language'])
-    print(code_details)
+    print(str(code_details))
 
     api_response = api.Chat(messages=[
+        {"role": "system", "content": "Interprete o pedido do usuário considerando: erros de linguagem, erros de sintaxe, apenas ignore-os"},
         {"role": "system", "content": "Identifique o que o usuário quer que você faça e em qual linguagem de programação"},
-        {"role": "system", "content": "Se o usuário não especificar nenhuma linguagem de programação conhecida na frase, retorne apenas 'None',caso contrário, retorne a mensagem como um objeto JSON,sem nenhum tipo de texto além disso, indexando no objeto o que o usuário pediu, em qual linguagem de programação ele quer e a extensão do arquivo da linguagem de programação que o usuário pediu(exemplo: '.js')"},
-        {"role": "system", "content": "Indexe o que o usuário pediu como 'To_do', a linguagem que ele quer como 'p_language'e a extensão do arquivo como 'ext'"},
+        {"role": "system", "content": "Se o usuário não especificar nenhuma linguagem de programação conhecida na frase, interprete uma linguagem de programação que poderia se adaptar ao pedido do usuário, caso contrário, retorne a mensagem como um objeto JSON, sem nenhum tipo de texto além disso, indexando no objeto oque o usuário pediu, em qual linguagem de programação ele quer, o nome do arquivo deverá ser criado com base no contexto do pedido e a extensão do arquivo da linguagem de programação que o usuário pediu, (exemplo: '.js')"},
+        {"role": "system", "content": "Indexe nesse JSON; crie etapas de acordo com o que o usuário pediu em formato de texto e indexe como: 'task', a linguagem de programação selecionada como: 'p_language', defina a criatividade necessária para a tarefa em escala de (0-2) como 'temperature', o nome do arquivo como 'file_name' sem a extensão do arquivo, e a extensão do arquivo como 'ext'"},
         {"role": "user", "content": code_details}],
-        temperature=0
+        temperature=0.5,
+        tokens=1250,
     )
 
-    print(api_response)
+    print(api_response[0])
 
-    api_response = json.loads(api_response)
+    api_response = json.loads(api_response[0])
 
+    Project_Language = api_response["p_language"]
+    Project_Task = api_response["task"]
+    Project_Temperature = api_response["temperature"]
+    Project_FileName = api_response["file_name"]
 
-
-
-    content_translated = Languages.Translate(Settings,api_response["To_do"] + " em " + api_response["p_language"])
-
-    #
-    final_code = api.Chat(messages=[
-        {"role": "system", "content": "responda apenas com o código que o usuário pediu, sem nenhum tipo de texto além disso"},
-        {"role": "user", "content": content_translated}
-        ], temperature=1)
+    Responses = api.Chat(messages=[
+        {"role": "system", "content": "É extremamente importante que sua resposta utilize somente de caracteres alfanuméricos. (exemplo: 'a-z', '0-9', 'A-Z')"},
+        {"role": "system", "content": f"Imagine que você está dentro de um interpretador de código na linguagem: {Project_Language} e que deve responder de acordo com a normas da linguagem de programação."},
+        {"role": "system", "content": "Interprete a tarefa a ser executada e crie o código solicitado."},
+        {"role": "system", "content": "O código será inserido diretamente em um arquivo, e deve estar pronto para que seja executado, sem alterações, entenda que, não pode-se acrescentar nada além de código na sua resposta."},
+        {"role": "system", "content": "Interprete o código criado, Crie comentários no código utilizando o sistema de comentários da linguagem de programação que o usuário pediu, explicando o que cada parte do código faz, e o que o código faz como um todo, e retorne o código com os comentários"},
+        {"role": "system", "content": "Retorne somente o código, é importante que não contenha nenhum tipo de texto além do código, não é necessário que utilize de markdown ou formatações do tipo, apenas o código."},
+        {"role": "system", "content": "Não crie instruções, comentários que não estejam em formato de código, e não insira caracteres que não sejam alfanuméricos, (exemplo: 'a-z', '0-9', 'A-Z')"},
+        {"role": "user", "content": f"{Project_Task} ({Project_Language})"}],
+        temperature=float(Project_Temperature),
+        tokens=2000,
+    )
 
     time = datetime.now()
-    fileDate = f"{time.day}_{time.month}_{time.year}-{time.hour}-{time.minute}-{time.second}"
-    fileName = f"code_{fileDate}"
     extension = api_response["ext"]
-    with open(f"./scripts/{fileName}{extension}", 'w', encoding='utf-8') as f:
-        f.write(str(final_code))
-        cprint(f"[VRS]: Code created: {fileName}{extension}", "cyan")
-        codePath = os.path.abspath(f"./scripts/{fileName}{extension}")
+    with open(f"./scripts/{Project_FileName}{extension}", 'w', encoding='utf-8') as f:
+        f.write(str(Responses[0]))
+        print(f"[VRS]: Code created: {Project_FileName}{extension}", "cyan")
+        codePath = os.path.abspath(f"./scripts/{Project_FileName}{extension}")
         os.system(f'code "{codePath}"')
 
     return
@@ -210,9 +281,25 @@ Commands = [
         "run": IntroduceYourself,
     },
     {
-        "name": "New code",
+        "name": "What is your name",
+        "run": IntroduceYourself,
+    },
+    {
+        "name": "Introduce yourself",
+        "run": IntroduceYourself,
+    },
+    {
+        "name": "What you can do?",
+        "run": IntroduceYourself,
+    },
+    {
+        "name": "Write code",
         "run": CreateNewCode,
     },
+    {
+        "name": "Write text",
+        "run": CreateText,
+    }
 ]
 
 def GetCommands():
