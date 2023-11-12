@@ -23,7 +23,7 @@ OpenAI = API(
 ) #type: ignore
 
 STS = Sentence.SentenceService()
-CMDS = Commands.GetCommands()
+##CMDS = Commands.GetCommands()
 
 # PyGui
 rowSize = (50, 2)
@@ -118,21 +118,22 @@ class App:
                     print("[VRS]: You need to say something and select a language.", "red")
                     continue
 
-                HasCommandRun = False
-                for Command in CMDS:
-                    CommandName = Command["name"]
-                    Similarity = STS.run(self.InputText, CommandName) # type: ignore
-                    if Similarity > 75:
-                        print(f"Command: {CommandName} ({Similarity}%)", "cyan")
-                        RESPONSE = Commands.RunCommand(CommandName, {
-                            "voice": values[2],
-                            "language": values[1],
-                            "codeLanguage": values[0],
-                            "volume": values[3]
-                        })
-                        print(f"[VRS]: {RESPONSE}", "yellow")
-                        HasCommandRun = True
-                        break
+                ##for Command in CMDS:
+                ##CommandName = Command["name"]
+                #Similarity = STS.run(self.InputText, CommandName) # type: ignore
+                ##if Similarity > 75:
+                #print(f"Command: {CommandName} ({Similarity}%)", "cyan")
+
+                RESPONSE = Commands.RunCommand(self.InputText, {   #type:ignore
+                    "voice": values[2],
+                    "language": values[1],
+                    "codeLanguage": values[0],
+                    "volume": values[3]
+                })
+                #print(f"[VRS]: {RESPONSE}", "yellow")
+                
+                HasCommandRun = RESPONSE
+                    
                 if HasCommandRun == False:
                     print("[VRS]: Sending Text to OpenAI's API", "green")
                     text = self.InputText
@@ -143,6 +144,8 @@ class App:
                         print('')
                         OpenAI.Speak(response) #type: ignore
                         #main.speak_text(response, values[1], values[3]/100)
+                else:
+                    pass
 
             if event == "Code":
                 if self.InputText == "" or values[0] == None:

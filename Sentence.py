@@ -4,15 +4,16 @@ from googletrans import Translator
 
 model_name = 'bert-base-nli-mean-tokens'
 
+translator = Translator()
+
 class SentenceService:
     def __init__(self, model_name: str = model_name):
         self.model = SentenceTransformer(model_name)
 
     def convert_items_to_english(self, wordslist):
-        translator = Translator()
         finalList = []
         for i in wordslist:
-            finalList.append(translator.translate(i))
+            finalList.append(translator.translate(i).text) #type: ignore
         return finalList
 
 

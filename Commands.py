@@ -1,4 +1,10 @@
+from asyncore import ExitNow
 from datetime import datetime
+import pprint
+from typing import final
+from unittest import result
+from click import command
+from joblib import PrintTime
 from numpy import number
 from openai import audio
 import random
@@ -7,7 +13,7 @@ from torch import seed
 import main
 from regex import F
 import requests
-from sympy import content
+from sympy import content, true
 from bs4 import BeautifulSoup
 from googletrans import Translator
 from termcolor import cprint as print
@@ -259,47 +265,57 @@ def CreateNewCode(Settings):
 
 Commands = [
     {
-        "name": "What time is?",
+        "names": ["What time is?"],
+        "default_code_command": "Code1",
         "run": WhatTimeIs
     },
     {
-        "name": "Create an alarm",
+        "names": ["What time is?"],
+        "default_code_command": "Code2",
         "run": CreateAlarm,
     },
     {
-        "name": "Send a message",
-        "run": SendMessage,
-    },
-    {
-        "name": "News of the day",
-        "run": TellNews,
-    },
-    {
-        "name": "Order food",
-        "run": OrderFood,
-    },
-    {
-        "name": "Who are you",
-        "run": IntroduceYourself,
-    },
-    {
-        "name": "What is your name",
-        "run": IntroduceYourself,
-    },
-    {
-        "name": "Introduce yourself",
-        "run": IntroduceYourself,
-    },
-    {
-        "name": "What you can do?",
-        "run": IntroduceYourself,
-    },
-    {
-        "name": "Write code",
+        "names": ["Create a new code", "New Code", "Write a new code", "Code", "make a code"],
+        "default_code_command": "Code3",
         "run": CreateNewCode,
     },
     {
-        "name": "Write text",
+        "names": ["What time is?"],
+        "default_code_command": "Code4",
+        "run": TellNews,
+    },
+    {
+        "names": ["What time is?"],
+        "default_code_command": "Code5",
+        "run": OrderFood,
+    },
+    {
+        "names": ["What time is?"],
+        "default_code_command": "Code6",
+        "run": IntroduceYourself,
+    },
+    {
+        "names": ["Introduce yourself", "Present yourself","Who","you are", "Your objective", "What","do you do", "Yourself", "is your objective"], 
+        "default_code_command": "Code7",
+        "run": IntroduceYourself,
+    },
+    {
+        "names": ["I would like to know", "Can you tell me", "Who was", "Can you explain me", "Who is", "Who made", "What is", "Who created", "Why"],
+        "default_code_command": "Code8",
+    },
+    {
+        "names": ["What time is?"],
+        "default_code_command": "Code9",
+        "run": IntroduceYourself,
+    },
+    {
+        "names": ["What time is?"],
+        "default_code_command": "Code10",
+        "run": CreateNewCode,
+    },
+    {
+        "names": ["Write text"],
+        "default_code_command": "Code11",
         "run": CreateText,
     }
 ]
@@ -309,6 +325,45 @@ def GetCommands():
 
 def RunCommand(commandName: str, Settings):
     CMDS = GetCommands()
-    for Command in CMDS:
-        if Command["name"] == commandName:
-            return Command["run"](Settings)
+    average = 0
+    total = 0
+    final_dict = {}
+    result_list = []
+    for Command in CMDS:  
+        for index, sentence in enumerate(Command["names"]):
+            in_english = STS.convert_items_to_english([commandName])[0] 
+            result = STS.get_similarity(in_english, sentence)
+            #print(str(int(result)))
+            total += result
+            print(str(index+1))
+            if index+1 == len(Command["names"]): #fdp oq eu sou burro eh brincadeira
+                print("aqui")
+                command = Command["default_code_command"]
+                average = total/len(Command["names"])
+                final_dict[Command["default_code_command"]] = {"Command_name": Command["default_code_command"], "average": average}
+                
+                average = 0
+                total = 0
+            pass
+        print("===================================================")
+    
+    print(str(final_dict))
+    print("===================================================")
+
+    for i,v in final_dict.items():
+        print(str(v["average"]))
+        result_list.append(v['average'])
+
+    result_list.sort(reverse=True)
+    absolute_result = result_list[0]
+
+    for i,v in final_dict.items():
+        if v["average"] == absolute_result:
+            for k in CMDS: 
+                if k["default_code_command"] == v["Command_name"]:
+                    if v["Command_name"] == "Code8":
+                        return False
+                    else:
+                        k["run"](Settings)
+                    
+    return True
